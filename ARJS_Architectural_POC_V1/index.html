@@ -363,6 +363,15 @@
         Rotate ↷
       </button>
 
+      <!-- Z-axis rotation controls -->
+      <button id="rotateZLeft" type="button">
+        ↶ Z Tilt
+      </button>
+
+      <button id="rotateZRight" type="button">
+        Z Tilt ↷
+      </button>
+
       <button id="scaleUp" type="button">
         + Size
       </button>
@@ -550,6 +559,24 @@
       }
 
 
+      // Z-AXIS ROTATION
+      function rotateZBy(degrees) {
+
+          if (!activeConfiguration) {
+              status.textContent = 'Please scan a marker first';
+              return;
+          }
+
+          const building = activeConfiguration.building;
+
+          const rotation = building.getAttribute('rotation');
+
+          rotation.z = (rotation.z + degrees + 360) % 360;
+
+          building.setAttribute('rotation', rotation);
+      }
+
+
       // SCALING
       function resizeBy(amount) {
 
@@ -607,6 +634,13 @@
       document.querySelector('#rotateRight')
         .addEventListener('click', () => rotateBy(15));
 
+      // Z-AXIS BUTTON EVENTS
+      document.querySelector('#rotateZLeft')
+          .addEventListener('click', () => rotateZBy(-15));
+
+      document.querySelector('#rotateZRight')
+          .addEventListener('click', () => rotateZBy(15));
+
       document.querySelector('#scaleUp')
         .addEventListener('click', () => resizeBy(0.1));
 
@@ -626,22 +660,35 @@
 
       // GLB MODEL LOADING EVENTS
 
+      const modelLoaders = [
+          { element: largeModel, name: 'Large Building' },
+          { element: brickModel, name: 'Brick Building' }
+      ];
+
+      modelLoaders.forEach(({ element, name }) => {
+
+          if (!element) {
+              console.error(name + ' model entity not found.');
+              return;
+          }
+
           element.addEventListener('model-loaded', () => {
-        console.log(name + ' GLB loaded successfully.');
-        });
+              console.log(name + ' GLB loaded successfully.');
+          });
 
-        element.addEventListener('model-error', event => {
+          element.addEventListener('model-error', event => {
 
-        console.error(
-            'Failed to load ' + name + ' GLB:',
-            event.detail
-        );
+              console.error(
+                  'Failed to load ' + name + ' GLB:',
+                  event.detail
+              );
 
-        status.textContent =
-            name + ' model failed to load. Check its file path.';
+              status.textContent =
+                  name + ' model failed to load. Check its file path.';
+          });
 
-        });
-        
+      });
+
       /*largeModel.addEventListener('model-loaded', () => {
 
         console.log('Large building GLB loaded successfully');
