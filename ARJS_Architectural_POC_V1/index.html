@@ -1,0 +1,677 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+  <title>Interactive Architectural AR</title>
+
+  <!-- Existing library versions retained -->
+  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+  <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.7/aframe/build/aframe-ar.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      background: transparent;
+    }
+
+    a-scene {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .hud {
+      position: fixed;
+      z-index: 20;
+      left: 0;
+      right: 0;
+      padding: 10px 12px;
+      color: white;
+      pointer-events: none;
+    }
+
+    .top {
+      top: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .title, .status, .info {
+      background: rgba(0,0,0,.68);
+      border-radius: 10px;
+      padding: 9px 11px;
+    }
+
+    .title {
+      font-size: 13px;
+      font-weight: 700;
+      max-width: 65%;
+    }
+
+    .status {
+      font-size: 12px;
+      text-align: right;
+    }
+
+    .bottom {
+      bottom: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 7px;
+      pointer-events: auto;
+    }
+
+    button {
+      border: 0;
+      border-radius: 9px;
+      padding: 11px 13px;
+      min-height: 42px;
+      background: #f3f4f6;
+      color: #111827;
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    button:active {
+      transform: scale(.97);
+    }
+
+    button:disabled {
+      opacity: .5;
+    }
+
+    .info {
+      display: none;
+      pointer-events: auto;
+      font-size: 12px;
+      line-height: 1.45;
+      max-width: 620px;
+      margin: 0 auto;
+    }
+
+    .info.open {
+      display: block;
+    }
+
+    .hint {
+      font-size: 11px;
+      text-align: center;
+      color: white;
+      text-shadow: 0 1px 3px black;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- TOP INTERFACE -->
+  <div class="hud top">
+    <div class="title">
+      Interactive Architectural AR – Proof of Concept
+    </div>
+
+    <div id="status" class="status">
+      Scan Hiro or your custom building marker
+    </div>
+  </div>
+
+
+  <!-- AR SCENE -->
+  <a-scene
+    embedded
+    vr-mode-ui="enabled: false"
+    renderer="logarithmicDepthBuffer: true; alpha: true; antialias: true; precision: mediump"
+    arjs="sourceType: webcam; debugUIEnabled: false; patternRatio: 0.5;"
+  >
+
+    <!-- ================================================= -->
+    <!-- MARKER 1: HIRO -->
+    <!-- Existing primitive-based architectural building -->
+    <!-- ================================================= -->
+
+    <a-marker
+      id="hiro-marker"
+      preset="hiro"
+      size="0.16"
+      emitevents="true"
+    >
+
+      <a-entity
+        id="hiro-building"
+        position="0 0 0"
+        rotation="0 0 0"
+        scale="1 1 1"
+      >
+
+        <!-- Foundation -->
+        <a-box
+          position="0 0.006 0"
+          width="0.155"
+          height="0.012"
+          depth="0.125"
+          color="#77838b">
+        </a-box>
+
+        <!-- Main building -->
+        <a-box
+          position="0 0.047 0"
+          width="0.125"
+          height="0.070"
+          depth="0.095"
+          color="#ded8cc">
+        </a-box>
+
+        <!-- Upper volume -->
+        <a-box
+          position="0 0.105 -0.006"
+          width="0.085"
+          height="0.045"
+          depth="0.075"
+          color="#c8d4d8">
+        </a-box>
+
+        <!-- Roof -->
+        <a-box
+          position="0 0.085 0"
+          width="0.138"
+          height="0.009"
+          depth="0.108"
+          color="#445b70">
+        </a-box>
+
+        <a-box
+          position="0 0.131 -0.006"
+          width="0.096"
+          height="0.009"
+          depth="0.085"
+          color="#445b70">
+        </a-box>
+
+        <!-- Door -->
+        <a-box
+          position="0 0.028 0.0485"
+          width="0.020"
+          height="0.040"
+          depth="0.003"
+          color="#805b43">
+        </a-box>
+
+        <!-- Windows -->
+        <a-box
+          position="-0.037 0.055 0.0485"
+          width="0.025"
+          height="0.022"
+          depth="0.003"
+          color="#547d91">
+        </a-box>
+
+        <a-box
+          position="0.037 0.055 0.0485"
+          width="0.025"
+          height="0.022"
+          depth="0.003"
+          color="#547d91">
+        </a-box>
+
+        <a-box
+          position="-0.024 0.107 0.032"
+          width="0.020"
+          height="0.018"
+          depth="0.003"
+          color="#547d91">
+        </a-box>
+
+        <a-box
+          position="0.024 0.107 0.032"
+          width="0.020"
+          height="0.018"
+          depth="0.003"
+          color="#547d91">
+        </a-box>
+
+      </a-entity>
+
+    </a-marker>
+
+
+    <!-- ================================================= -->
+    <!-- MARKER 2: CUSTOM LARGE BUILDING MARKER -->
+    <!-- Displays downloaded GLB architectural model -->
+    <!-- ================================================= -->
+
+    <a-marker
+      id="custom-marker"
+      type="pattern"
+      url="markers/large-building-v2.patt"
+      size="0.16"
+      emitevents="true"
+    >
+
+      <!-- Parent object: controls position, rotation and size -->
+      <a-entity
+        id="custom-building"
+        position="0 0 0"
+        rotation="0 0 0"
+        scale="1 1 1"
+      >
+      <!--Red Cube Test
+        
+        <a-box
+          position="0 0.05 0"
+          width="0.08"
+          height="0.08"
+          depth="0.08"
+          color="red">
+        </a-box>  -->
+
+        <!-- Downloaded architectural model -->
+        <a-entity
+          id="large-model"
+          gltf-model="url(./models/large-building.glb)"
+          position="0 0 0"
+          rotation="0 0 0"
+        >
+        </a-entity> 
+
+      </a-entity>
+
+    </a-marker>
+
+    <!-- ================================================= -->
+    <!-- MARKER 3: CUSTOM BRICK BUILDING MARKER -->
+    <!-- Displays downloaded GLB architectural model -->
+    <!-- ================================================= -->
+
+    <a-marker
+      id="custom-marker-2"
+      type="pattern"
+      url="markers/brick-building.patt"
+      size="0.16"
+      emitevents="true"
+    >
+
+      <!-- Parent object: controls position, rotation and size -->
+      <a-entity
+        id="custom-building-2"
+        position="0 0 0"
+        rotation="0 0 0"
+        scale="0.1 0.1 0.1"
+      >
+
+        <!-- Downloaded architectural model -->
+        <a-entity
+          id="brick-model"
+          gltf-model="url(./models/brick-building.glb)"
+          position="0 0 0"
+          rotation="0 0 0"
+        >
+        </a-entity> 
+
+      </a-entity>
+
+    </a-marker>
+
+
+    <!-- CAMERA -->
+    <a-entity camera></a-entity>
+
+  </a-scene>
+
+
+  <!-- ================================================= -->
+  <!-- USER INTERFACE -->
+  <!-- ================================================= -->
+
+  <div class="hud bottom">
+
+    <div id="info" class="info">
+      <strong>Architectural Model Information</strong>
+      <div id="info-content">
+        Scan a marker to view its building information.
+      </div>
+    </div>
+
+    <div class="controls">
+
+      <button id="rotateLeft" type="button">
+        ↶ Rotate
+      </button>
+
+      <button id="rotateRight" type="button">
+        Rotate ↷
+      </button>
+
+      <button id="scaleUp" type="button">
+        + Size
+      </button>
+
+      <button id="scaleDown" type="button">
+        - Size
+      </button>
+
+      <button id="reset" type="button">
+        Reset
+      </button>
+
+      <button id="toggleInfo" type="button">
+        Building info
+      </button>
+
+    </div>
+
+    <div class="hint">
+      Keep the complete marker visible, flat and well lit.
+    </div>
+
+  </div>
+
+
+  <!-- ================================================= -->
+  <!-- JAVASCRIPT -->
+  <!-- ================================================= -->
+
+  <script>
+
+    const scene = document.querySelector('a-scene');
+
+    function initialiseControls() {
+
+      const status = document.querySelector('#status');
+      const info = document.querySelector('#info');
+      const infoContent = document.querySelector('#info-content');
+
+      const hiroMarker = document.querySelector('#hiro-marker');
+      const customMarker = document.querySelector('#custom-marker');
+      const brickMarker = document.querySelector('#custom-marker-2');
+
+      const hiroBuilding = document.querySelector('#hiro-building');
+      const customBuilding = document.querySelector('#custom-building');
+      const brickBuilding = document.querySelector('#custom-building-2');
+
+      const largeModel = document.querySelector('#large-model');
+      const brickModel = document.querySelector('#brick-model');
+
+
+      // Each marker has its own building and original scale.
+      const markerConfigurations = [
+        {
+          name: 'Hiro',
+          marker: hiroMarker,
+          building: hiroBuilding,
+          baseScale: 1,
+          scaleFactor: 1,
+
+          information: `
+            <br>Model: Original primitive-based building.
+            <br>Tracking: Hiro marker.
+            <br>Components: Foundation, walls, roof, windows and entrance.
+            <br><em>Conceptual demonstration model.</em>
+          `
+        },
+
+        {
+          name: 'Custom Building',
+          marker: customMarker,
+          building: customBuilding,
+          baseScale: 0.5,
+          scaleFactor: 1,
+
+          information: `
+            <br>Model: Imported architectural GLB.
+            <br>Tracking: Custom building pattern marker.
+            <br>Format: GLB / glTF.
+            <br><em>Demonstration architectural model.</em>
+          `
+        },
+
+        {
+        name: 'Brick Building',
+        marker: brickMarker,
+        building: brickBuilding,
+        baseScale: brickBuilding.object3D.scale.x,
+        scaleFactor: 1,
+
+        information: `
+            <br>Model: Imported brick-building GLB.
+            <br>Tracking: Brick Building custom pattern marker.
+            <br>Format: GLB / glTF.
+            <br><em>Demonstration architectural model.</em>
+        `
+        }
+      ];
+
+
+      // Keep track of markers currently detected.
+      const detectedMarkers = new Map();
+
+      let activeConfiguration = null;
+
+
+      // Set which building the controls will manipulate.
+      function activateConfiguration(config) {
+
+        activeConfiguration = config;
+
+        status.textContent =
+          config.name + ' detected – controls active';
+
+        infoContent.innerHTML = config.information;
+      }
+
+
+      // Marker detection and loss events.
+      markerConfigurations.forEach(config => {
+
+        config.marker.addEventListener('markerFound', () => {
+
+          detectedMarkers.delete(config.name);
+          detectedMarkers.set(config.name, config);
+
+          activateConfiguration(config);
+
+          console.log(config.name + ' marker detected');
+
+        });
+
+
+        config.marker.addEventListener('markerLost', () => {
+
+          detectedMarkers.delete(config.name);
+
+          console.log(config.name + ' marker lost');
+
+          if (activeConfiguration === config) {
+
+            const remaining =
+              Array.from(detectedMarkers.values());
+
+            activeConfiguration =
+              remaining.length > 0
+                ? remaining[remaining.length - 1]
+                : null;
+
+            if (activeConfiguration) {
+
+              activateConfiguration(activeConfiguration);
+
+            } else {
+
+              status.textContent =
+                'No marker detected – scan Hiro or custom marker';
+
+              infoContent.innerHTML =
+                'Scan a marker to view its building information.';
+
+            }
+          }
+
+        });
+
+      });
+
+
+      // ROTATION
+      function rotateBy(degrees) {
+
+        if (!activeConfiguration) {
+          status.textContent = 'Please scan a marker first';
+          return;
+        }
+
+        const building = activeConfiguration.building;
+
+        const rotation = building.getAttribute('rotation');
+
+        rotation.y = (rotation.y + degrees + 360) % 360;
+
+        building.setAttribute('rotation', rotation);
+      }
+
+
+      // SCALING
+      function resizeBy(amount) {
+
+        if (!activeConfiguration) {
+          status.textContent = 'Please scan a marker first';
+          return;
+        }
+
+        const config = activeConfiguration;
+
+        config.scaleFactor = Math.max(
+          0.5,
+          Math.min(1.8, config.scaleFactor + amount)
+        );
+
+        const actualScale =
+          config.baseScale * config.scaleFactor;
+
+        config.building.setAttribute(
+          'scale',
+          `${actualScale} ${actualScale} ${actualScale}`
+        );
+
+      }
+
+
+      // RESET
+      function resetBuilding() {
+
+        if (!activeConfiguration) {
+          status.textContent = 'Please scan a marker first';
+          return;
+        }
+
+        const config = activeConfiguration;
+
+        config.building.setAttribute('rotation', '0 0 0');
+
+        config.scaleFactor = 1;
+
+        const scale = config.baseScale;
+
+        config.building.setAttribute(
+          'scale',
+          `${scale} ${scale} ${scale}`
+        );
+
+      }
+
+
+      // BUTTON EVENTS
+      document.querySelector('#rotateLeft')
+        .addEventListener('click', () => rotateBy(-15));
+
+      document.querySelector('#rotateRight')
+        .addEventListener('click', () => rotateBy(15));
+
+      document.querySelector('#scaleUp')
+        .addEventListener('click', () => resizeBy(0.1));
+
+      document.querySelector('#scaleDown')
+        .addEventListener('click', () => resizeBy(-0.1));
+
+      document.querySelector('#reset')
+        .addEventListener('click', resetBuilding);
+
+      document.querySelector('#toggleInfo')
+        .addEventListener('click', () => {
+
+          info.classList.toggle('open');
+
+        });
+
+
+      // GLB MODEL LOADING EVENTS
+
+          element.addEventListener('model-loaded', () => {
+        console.log(name + ' GLB loaded successfully.');
+        });
+
+        element.addEventListener('model-error', event => {
+
+        console.error(
+            'Failed to load ' + name + ' GLB:',
+            event.detail
+        );
+
+        status.textContent =
+            name + ' model failed to load. Check its file path.';
+
+        });
+        
+      /*largeModel.addEventListener('model-loaded', () => {
+
+        console.log('Large building GLB loaded successfully');
+
+      });
+
+      largeModel.addEventListener('model-error', event => {
+
+        console.error('Failed to load architectural GLB:', event.detail);
+
+        status.textContent =
+          'Custom building failed to load. Check the GLB file path.';
+
+      });*/
+
+    }
+
+
+    // Wait until A-Frame has loaded.
+    if (scene.hasLoaded) {
+
+      initialiseControls();
+
+    } else {
+
+      scene.addEventListener('loaded', initialiseControls);
+
+    }
+
+  </script>
+
+</body>
+</html>
